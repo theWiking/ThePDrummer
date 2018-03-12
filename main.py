@@ -16,8 +16,27 @@ __email__='@.gmail.com'
 __author__='Matesz Koch'
 
 #FUNCTIONS
+def FrameMaker(parent,title="",column=0,row=0):
+
+    MainFrame = tk.LabelFrame(parent, text=title)
+    MainFrame.grid(column=column, row=row)
+    MainFrame.columnconfigure(0, weight=1)
+    MainFrame.rowconfigure(0, weight=1)
+    MainFrame.pack(fill="both", expand="yes")
+
+    return MainFrame
+
 def _msgBox(title,infoText):
-    msg.showinfo(title,infoText)
+    dialogeBox=tk.Toplevel(window)
+    dialogeBox.title(title)
+    dialogeBox.geometry("200x100+100+100")
+    dialogeBox.attributes("-toolwindow", 1)
+    dialogeBox.grab_set()
+    dialogeBox.focus_force()
+    #dialogeBox.after(10,lambda: )
+    frame=FrameMaker(dialogeBox)
+    tk.Label(frame,text=infoText).grid(column=0,row=0)
+
 
 def StartLoop():
     window.mainloop()
@@ -29,7 +48,7 @@ def _quit(): # 7
 def ShowVersion():
     _msgBox("Version",__version__)
 def ShowContact():
-    _msgBox("Contact","Contact to "+__author__+"/n"+__email__)
+    _msgBox("Contact","Contact to "+__author__+"\n"+__email__)
 def ShowAbout():
     _msgBox("About","")
 def ShowHelp():
@@ -41,15 +60,7 @@ def runRecord(name="",seconds=0):
     recordWave.recordSample(FILE_NAME=name,RECORD_SECONDS=seconds)
     print("endRecord")
 
-def FrameMaker(parent,title="",column=0,row=0):
 
-    MainFrame = tk.LabelFrame(parent, text=title)
-    MainFrame.grid(column=column, row=row)
-    MainFrame.columnconfigure(0, weight=1)
-    MainFrame.rowconfigure(0, weight=1)
-    MainFrame.pack(fill="both", expand="yes")
-
-    return MainFrame
 def CleanFrame(frame):
     for widget in frame.winfo_children():
         widget.destroy()
