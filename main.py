@@ -37,7 +37,6 @@ def _msgBox(title,infoText):
     frame=FrameMaker(dialogeBox)
     tk.Label(frame,text=infoText).grid(column=0,row=0)
 
-
 def StartLoop():
     window.mainloop()
 def _quit(): # 7
@@ -53,13 +52,6 @@ def ShowAbout():
     _msgBox("About","")
 def ShowHelp():
     pass
-
-def runRecord(name="",seconds=0):
-
-    print("startRecord")
-    recordWave.recordSample(FILE_NAME=name,RECORD_SECONDS=seconds)
-    print("endRecord")
-
 
 def CleanFrame(frame):
     for widget in frame.winfo_children():
@@ -79,35 +71,66 @@ def testValDigit(inStr,i,acttyp):
     return True
 
 
-def _LoadSechamt(title,clear=True):
+def _LoadSechamt(title,parent,clear=True):
     if(clear):
         CleanFrame(mainFrame)
-    frame = FrameMaker(mainFrame,title=title)
+    frame = FrameMaker(parent,title=title)
 
     return frame
-# Load write patter view
+
+#FUNCTION BUTTONS
+def runRecord(name="",seconds=0):
+
+    print("startRecord")
+    recordWave.recordSample(FILE_NAME=name,RECORD_SECONDS=seconds)
+    print("endRecord")
+
+
+
+#COMBO Load write patter view
 def LoadWP():
-    CleanFrame(mainFrame)
+    frame = _LoadSechamt("Write Pattern",mainFrame)
     pass
-# Load Play and get pattern view
+#COMBO Load Play and get pattern view
 def LoadPnGP():
-    CleanFrame(mainFrame)
+    frame = _LoadSechamt("Play and get pattern",mainFrame)
     pass
-# Load Generate Patter view
+#COMBO Load Generate Patter view
 def LoadGP():
-    CleanFrame(mainFrame)
+    frame = _LoadSechamt("Generate Pattern",mainFrame)
     pass
 # Load Midi player view
 def LoadMV():
-    CleanFrame(mainFrame)
+    frame = _LoadSechamt("Midi player (drum)", mainFrame)
     pass
 # Load slice audio view
 def LoadSA():
-    CleanFrame(mainFrame)
+    frame = _LoadSechamt("Slice Audio", mainFrame)
+    pass
+# Load Make midi view
+def LoadMMV():
+    frame = _LoadSechamt("Make midi pattern", mainFrame)
+    pass
+# Load Find Tempo view
+def LoadFTV():
+    frame = _LoadSechamt("Find Tempo", mainFrame)
+    pass
+# Load Find Freq view
+def LoadFFV():
+    frame = _LoadSechamt("Find Freq in sample", mainFrame)
+    pass
+# Load Scales on fingerboard view
+def LoadSCALES():
+    frame = _LoadSechamt("Scales", mainFrame)
+    pass
+# Load Tuner view
+def LoadTuner():
+    frame = _LoadSechamt("Tuner", mainFrame)
     pass
 # Load Record audio view
+#TODO async
 def LoadRA():
-    frame=_LoadSechamt("Record Wave")
+    frame=_LoadSechamt("Record Wave",mainFrame)
     frame.columnconfigure(0, weight=1)
     frame.columnconfigure(1, weight=1)
     frame.columnconfigure(2,weight=1)
@@ -130,13 +153,13 @@ def LoadRA():
 
 
     frame.pack()
-
-    pass
+#TODO just for testes, i futre get set image here
 def LoadSimple():
     tk.Label(mainFrame,text="Hello").grid(column=0,row=0)
 #def FrameMaker(MainFrame):
  #   tk.Label(MainFrame,text="test").grid(column=0,row=0)
 
+#MENUS
 def HelpBar(menuBar):
     help = tk.Menu(menuBar, tearoff=0)
     help.add_command(label="Help",command=ShowHelp())
@@ -156,7 +179,15 @@ def FileMenu(menuBar):
     simpleFunction.add_command(label="Play Midi",command=LoadMV,state="disabled")
     simpleFunction.add_command(label="Slice audio by picks",command=LoadSA,state="disabled")
     simpleFunction.add_command(label="Record Wave",command=LoadRA)
+    simpleFunction.add_command(label="Make midi",command=LoadMMV,state="disabled")
+    simpleFunction.add_command(label="Find Tempo",command=LoadFTV,state="disabled")
+    simpleFunction.add_command(label="Find Freq",command=LoadFFV,state="disabled")
     file.add_cascade(label='Simple Functionality',menu=simpleFunction,underline=0)
+    file.add_separator()
+    addons=tk.Menu(file,tearoff=0)
+    addons.add_command(label="Scales",command=LoadSCALES,state="disabled")
+    addons.add_command(label="Tuner",command=LoadTuner,state="disabled")
+    file.add_cascade(label="Addons",menu=addons,underline=0)
     file.add_separator()
     file.add_command(label="Exit",command=_quit)
     return file
