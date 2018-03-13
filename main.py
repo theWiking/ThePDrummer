@@ -6,9 +6,12 @@
 
 
 #IMPORTS
+
 import tkinter as tk
 from tkinter import messagebox as msg
 import recordWave
+from threading import Thread
+from time import sleep
 
 #PROPERTYS
 __version__="alfa"
@@ -78,13 +81,37 @@ def _LoadSechamt(title,parent,clear=True):
 
     return frame
 
+def recordBackground(frame):
+   
+    while(True):
+
+        if(recordWave.ainfo==""):
+            frame.configure(background="white")
+        elif(recordWave.ainfo=="Ready"):
+            frame.configure(background="yellow")
+        elif(recordWave.ainfo=="end"):
+            frame.configure(background="grey")
+            break
+        else:
+            frame.configure(background="red")
+        sleep(0.1)
+    pass
 #FUNCTION BUTTONS
-def runRecord(name="",seconds=0):
+
+def runRecord(frame,name="",seconds=0):
 
     print("startRecord")
-    recordWave.recordSample(FILE_NAME=name,RECORD_SECONDS=seconds)
-    print("endRecord")
+    th=Thread(target=recordWave.recordSample,kwargs={'FILE_NAME':name,"RECORD_SECONDS":seconds})
+    th.daemon = True
+    th.start()
 
+    thObs = Thread(target=recordBackground, args={frame})
+    thObs.daemon=True
+    thObs.start()
+
+    print("endRecord")
+    pass
+    #return resp.status_code
 
 
 #COMBO Load write patter view
@@ -148,7 +175,8 @@ def LoadRA():
     textBoxName= tk.Entry(frame,textvariable=namefile)
     textBoxName.grid(column=1,row=1,sticky="nsew")
 
-    buttonRecord=tk.Button(frame,text="Record",command=lambda :runRecord(namefile.get(),seconds.get()))
+
+    buttonRecord=tk.Button(frame,text="Record",command=lambda:runRecord(frame,name=namefile.get(),seconds=seconds.get()))
     buttonRecord.grid(column=2,row=0,rowspan=2,sticky="nsew")
 
 
@@ -210,7 +238,6 @@ Menus()
 mainFrame=FrameMaker(title="",parent=window)
 LoadSimple()
 mainFrame.pack()
-
 
 
 #START

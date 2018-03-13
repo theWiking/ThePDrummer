@@ -1,10 +1,17 @@
 import pyaudio
 import wave
 from array import array
-
-
+import copy
+global ainfo
+ainfo=""
+def oberverInfo(info):
+    global ainfo
+    if (info!=ainfo):
+        ainfo=copy.deepcopy(info)
+    return ainfo
 
 def recordSample(FILE_NAME="Record",RECORD_SECONDS=15,RATE=44100,CHUNK=1024,CHANNELS=1):
+    oberverInfo("")
     FORMAT = pyaudio.paInt16
     FILE_NAME=FILE_NAME+".wav"
     # instantiate the pyaudio
@@ -14,6 +21,7 @@ def recordSample(FILE_NAME="Record",RECORD_SECONDS=15,RATE=44100,CHUNK=1024,CHAN
     frames=[]
     seconds=0
     print("REDY")
+    oberverInfo("Ready")
     while (True):
         data = stream.read(CHUNK)
         data_chunk = array('h', data)
@@ -29,6 +37,7 @@ def recordSample(FILE_NAME="Record",RECORD_SECONDS=15,RATE=44100,CHUNK=1024,CHAN
                 if (seconds != round(i * CHUNK / RATE)):
                     seconds = round(i * CHUNK / RATE)
                     print("Recording: ", seconds,"s on ",RECORD_SECONDS)
+                    oberverInfo(str(seconds))
             break
     # end of recording
     stream.stop_stream()
@@ -41,6 +50,8 @@ def recordSample(FILE_NAME="Record",RECORD_SECONDS=15,RATE=44100,CHUNK=1024,CHAN
     wavfile.setframerate(RATE)
     wavfile.writeframes(b''.join(frames))  # append frames recorded to file
     wavfile.close()
-    return True
+    oberverInfo("end")
+    pass
+
 #test:
 #recordSample(FILE_NAME="test",RECORD_SECONDS=5)
