@@ -82,7 +82,7 @@ def _LoadSechamt(title,parent,clear=True):
     return frame
 
 def recordBackground(frame):
-   
+
     while(True):
 
         if(recordWave.ainfo==""):
