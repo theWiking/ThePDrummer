@@ -9,6 +9,8 @@
 
 import tkinter as tk
 from tkinter import messagebox as msg, filedialog
+import os
+from shutil import copy2
 
 import recordWave
 import recognizeFreq
@@ -132,14 +134,23 @@ def runRecord(frame,name="",seconds=0):
     print("endRecord")
     pass
     #return resp.status_code
-#TODO Copy file to folder and make all on local folder
+
 def sliceAudio(frame,name=""):
     dictFrame=frame.__dict__
     dictFrame=dictFrame['children']
-    print(dictFrame)
+
     space=int(dictFrame['!entry'].get())
     pick=int(dictFrame['!entry2'].get())
-    th1=Thread(target=SliceAudio.SliceFileOnFragments,kwargs={'frame':frame,'tk':tk,'NAME':name,'spaceModificer':space,'pickExpadner':pick})
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path=dir_path+"\Audio"
+    try:
+        os.stat(dir_path)
+    except:
+        os.mkdir(dir_path)
+    copy2(name,dir_path)
+    newFilePath=dir_path+"\\"+os.path.basename(name)
+    th1=Thread(target=SliceAudio.SliceFileOnFragments,kwargs={'frame':frame,'tk':tk,'NAME':newFilePath,'spaceModificer':space,'pickExpadner':pick})
     th1.deamon=True
     th1.start()
     #space, pick,

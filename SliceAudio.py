@@ -54,34 +54,34 @@ def SliceFileOnFragments(frame,tk,NAME="",spaceModificer=20,pickExpadner=5):
         NAME=NAME+".wav"
     fullAudio,RATE = librosa.load(NAME)
 
-    print(len(fullAudio)/RATE)
+    #print(len(fullAudio)/RATE)
     audioNormalizte=librosa.util.normalize(fullAudio**pickExpadner)
     percusive=librosa.effects.percussive(audioNormalizte)
     o_env = librosa.onset.onset_strength(percusive,sr=RATE,feature=librosa.cqt)
-    print(len(o_env))
+    #print(len(o_env))
     onsetFrames = librosa.onset.onset_detect(onset_envelope=o_env,sr=RATE)
     tempo,timeBeats=librosa.beat.beat_track(percusive,RATE,start_bpm=60)
 
-    print(tempo)
-    print(onsetFrames)
+    #print(tempo)
+    #print(onsetFrames)
     onsetFrames=removeToClose(onsetFrames,tempo,spaceModificer)
 
-    print(onsetFrames)
+    #print(onsetFrames)
     onsetFrames=moveBack(onsetFrames)
     # Ta tablica interesuje mnie do MIDI
     print(onsetFrames)
     onsetSamples = list(librosa.frames_to_samples(onsetFrames))
 
-    print(onsetSamples)
-    for i in onsetSamples:
-        print(i/RATE)
+    #print(onsetSamples)
+    #for i in onsetSamples:
+        #print(i/RATE)
     onsetSamples=np.concatenate(onsetSamples,len(fullAudio))
 
     starts = onsetSamples[0:-1]
     stops=onsetSamples[1:]
-    print(starts)
-    print(stops)
-    print(len(onsetFrames))
+    #print(starts)
+    #print(stops)
+    #print(len(onsetFrames))
     clicks = librosa.core.clicks(frames=onsetFrames, sr=RATE, length=len(fullAudio))
     librosa.output.write_wav("output.wav", fullAudio + clicks, RATE)
 
@@ -99,24 +99,25 @@ def SliceFileOnFragments(frame,tk,NAME="",spaceModificer=20,pickExpadner=5):
     canvas = FigureCanvasTkAgg(fig, frame)
 
 
-    canvas.show()
+
     #canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH,expand=True)
     canvas.get_tk_widget().grid(column=0, row=4, columnspan=4, rowspan=4, sticky='nsew')
 
     toolbar_frame=tk.LabelFrame(frame,text="")
-    toolbar_frame.grid(column=0,row=3,columnspan=2)
+    toolbar_frame.grid(column=0,row=3,columnspan=4,sticky='nsew')
     toolbar=NavigationToolbar2TkAgg(canvas,toolbar_frame)
 
     frame.update()
 
 
-    print(timeBeats)
+    #print(timeBeats)
 
 
     #start slicing
     analysisFolder="beats"
+
     samplesFolder=os.path.join(analysisFolder,"samples")
-    print(analysisFolder)
+    #print(analysisFolder)
     try:
         os.makedirs(samplesFolder)
     except:
@@ -142,8 +143,8 @@ def SliceFileOnFragments(frame,tk,NAME="",spaceModificer=20,pickExpadner=5):
     np.savetxt(os.path.join(analysisFolder,"words.txt"),words,fmt='%s')
     np.savetxt(os.path.join(analysisFolder,'filenames.txt'),filenames,fmt='%s')
 
+    #canvas.show()
 
 
-    print("END_SLICE")
 
 #SliceFileOnFragments(NAME="MonoRythm")
