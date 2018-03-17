@@ -8,8 +8,12 @@
 #IMPORTS
 
 import tkinter as tk
-from tkinter import messagebox as msg
+from tkinter import messagebox as msg, filedialog
+
 import recordWave
+import recognizeFreq
+import SliceAudio
+
 from threading import Thread
 from time import sleep
 
@@ -74,13 +78,17 @@ def testValDigit(inStr,i,acttyp):
     return True
 
 
-def _LoadSechamt(title,parent,clear=True):
+def _LoadSechamt(title,parent,clear=True,column=4,row=4):
     if(clear):
         CleanFrame(mainFrame)
     frame = FrameMaker(parent,title=title)
-
+    for i in range(0,column):
+        frame.columnconfigure(i, weight=1)
+    for i in range(0,row):
+        frame.rowconfigure(i, weight=0)
     return frame
 
+# Change background in frame
 def recordBackground(frame):
 
     while(True):
@@ -96,6 +104,18 @@ def recordBackground(frame):
             frame.configure(background="red")
         sleep(0.1)
     pass
+def retunValueFreq(frame):
+    while(True):
+        if(recognizeFreq.ainfo!=0):
+            #_msgBox("test ",recognizeFreq.ainfo)
+            dictFrame=frame.__dict__
+            dictFrame=dictFrame['children']
+            dictFrame['!label']["text"]="Freq: "+" "+str(recognizeFreq.ainfo)
+
+
+            break
+        sleep(0.1)
+
 #FUNCTION BUTTONS
 
 def runRecord(frame,name="",seconds=0):
@@ -112,7 +132,47 @@ def runRecord(frame,name="",seconds=0):
     print("endRecord")
     pass
     #return resp.status_code
+#TODO Copy file to folder and make all on local folder
+def sliceAudio(frame,name=""):
+    dictFrame=frame.__dict__
+    dictFrame=dictFrame['children']
+    print(dictFrame)
+    space=int(dictFrame['!entry'].get())
+    pick=int(dictFrame['!entry2'].get())
+    th1=Thread(target=SliceAudio.SliceFileOnFragments,kwargs={'frame':frame,'tk':tk,'NAME':name,'spaceModificer':space,'pickExpadner':pick})
+    th1.deamon=True
+    th1.start()
+    #space, pick,
+    pass
 
+#TODO add funcion assync
+def findTempoAnalize(frame,path=""):
+    #print(path)
+    pass
+def findFreqAnalize(frame,path=""):
+    th1=Thread(target=recognizeFreq.recognizeFreq,kwargs={'NAME':path})
+    th1.daemon=True
+    _msgBox("Start","Now the audio will be analize")
+    th1.start()
+    thFreq =Thread(target=retunValueFreq,kwargs={'frame':frame})
+    thFreq.daemon=True
+    thFreq.start()
+
+
+    pass
+# Load file (parent frame what button unlock/lock and where pass frame
+def loadFile(frame,button,function):
+    fileName=filedialog.askopenfilename(initialdir = "ThePDrummer/",title = "Select file",filetypes=(("wave files","*.wav"),("all files","*.*")))
+    test=fileName[len(fileName)-4::]
+    if(test!=".wav"):
+        _msgBox("ERROR","NOT WAVE")
+        button['state']="disabled"
+    else:
+        button['state'] = "normal"
+        button['command']=lambda: function(frame, fileName)
+
+
+    pass
 
 #COMBO Load write patter view
 def LoadWP():
@@ -133,18 +193,55 @@ def LoadMV():
 # Load slice audio view
 def LoadSA():
     frame = _LoadSechamt("Slice Audio", mainFrame)
+    label1=tk.Label(frame, text="Space Parametr").grid(column=0, row=0)
+
+    label2=tk.Label(frame, text="Pick Parametr").grid(column=1, row=0)
+
+
+    space = tk.IntVar(value=20)
+    textSpaceParametr = tk.Entry(frame, textvariable=space, validate="all")
+    textSpaceParametr['validatecommand'] = (textSpaceParametr.register(testValDigit), '%P', '%i', '%d')
+    textSpaceParametr.grid(column=0, row=1, sticky='nsew')
+
+
+    pick = tk.IntVar(frame,value=5)
+    textPickParametr = tk.Entry(frame, textvariable=pick)
+    textPickParametr['validatecommand'] = (textPickParametr.register(testValDigit), '%P', '%i', '%d')
+    textPickParametr.grid(column=1, row=1, sticky="nsew")
+
+
+    buttonSliceIt=tk.Button(frame,text="Slice Audio",state="disabled")
+    buttonSliceIt.grid(column=3,row=0,rowspan=2,sticky="nsew")
+
+    tk.Button(frame, text="Load File", command=lambda: loadFile(frame, buttonSliceIt, sliceAudio)).grid(column=2, row=0,rowspan=2,sticky="nsew")
+
     pass
 # Load Make midi view
 def LoadMMV():
     frame = _LoadSechamt("Make midi pattern", mainFrame)
     pass
 # Load Find Tempo view
+#TODO fucntion to tempo
 def LoadFTV():
     frame = _LoadSechamt("Find Tempo", mainFrame)
+
+    infoLabel=tk.Label(frame,text="Tempo: ").grid(column=0,row=0)
+    buttonFindTempo = tk.Button(frame, text="Find Tempo", state="disabled")
+    buttonFindTempo.grid(column=2, row=0,sticky="nsew")
+
+    tk.Button(frame,text="Load File",command=lambda :loadFile(frame,buttonFindTempo,findTempoAnalize)).grid(column=1,row=0)
+
     pass
 # Load Find Freq view
 def LoadFFV():
     frame = _LoadSechamt("Find Freq in sample", mainFrame)
+    frame.columnconfigure(0, weight=0)
+    tk.Label(frame, text="Freq: ",width=50).grid(column=0, row=0,stick='w')
+    buttonFindFreq = tk.Button(frame, text="Find Freq", state="disabled")
+    buttonFindFreq.grid(column=2, row=0,sticky="nsew")
+    frame.pack()
+    tk.Button(frame, text="Load File", command=lambda: loadFile(frame, buttonFindFreq,findFreqAnalize)).grid(column=1, row=0,sticky="nsew")
+    frame.pack()
     pass
 # Load Scales on fingerboard view
 def LoadSCALES():
@@ -153,16 +250,12 @@ def LoadSCALES():
 # Load Tuner view
 def LoadTuner():
     frame = _LoadSechamt("Tuner", mainFrame)
+
     pass
 # Load Record audio view
-#TODO async
 def LoadRA():
     frame=_LoadSechamt("Record Wave",mainFrame)
-    frame.columnconfigure(0, weight=1)
-    frame.columnconfigure(1, weight=1)
-    frame.columnconfigure(2,weight=1)
-    frame.rowconfigure(0,weight=0)
-    frame.rowconfigure(1, weight=0)
+
     tk.Label(frame,text="Seconds of record").grid(column=0,row=0)
     tk.Label(frame,text="Name of record").grid(column=1,row=0)
 
@@ -205,11 +298,11 @@ def FileMenu(menuBar):
     file.add_separator()
     simpleFunction=tk.Menu(file,tearoff=0)
     simpleFunction.add_command(label="Play Midi",command=LoadMV,state="disabled")
-    simpleFunction.add_command(label="Slice audio by picks",command=LoadSA,state="disabled")
+    simpleFunction.add_command(label="Slice audio by picks",command=LoadSA)
     simpleFunction.add_command(label="Record Wave",command=LoadRA)
     simpleFunction.add_command(label="Make midi",command=LoadMMV,state="disabled")
     simpleFunction.add_command(label="Find Tempo",command=LoadFTV,state="disabled")
-    simpleFunction.add_command(label="Find Freq",command=LoadFFV,state="disabled")
+    simpleFunction.add_command(label="Find Freq",command=LoadFFV)
     file.add_cascade(label='Simple Functionality',menu=simpleFunction,underline=0)
     file.add_separator()
     addons=tk.Menu(file,tearoff=0)
